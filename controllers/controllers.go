@@ -18,40 +18,50 @@ type User struct {
 
 var users []User
 
-// Get All users
-func getUsers(w http.ResponseWriter, router *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+func TesConnection(ress http.ResponseWriter, router *http.Request) {
+
+	type Tes struct {
+		Success bool
+	}
+
+	var tes Tes
+
+	tes.Success = true
+
+	json.NewEncoder(ress).Encode(tes)
 }
 
-// Get single user
-func getUser(w http.ResponseWriter, router *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func GetUsers(ress http.ResponseWriter, router *http.Request) {
+	ress.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(ress).Encode(users)
+}
+
+func GetUser(ress http.ResponseWriter, router *http.Request) {
+	ress.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(router)
-	// Gets params
-	// Loop through users and find one with the id from the params
+
 	for _, item := range users {
 		if item.ID == params["id"] {
-			json.NewEncoder(w).Encode(item)
+			json.NewEncoder(ress).Encode(item)
 			return
 		}
 	}
-	json.NewEncoder(w).Encode(&User{})
+	json.NewEncoder(ress).Encode(&User{})
 }
-func createUser(w http.ResponseWriter, router *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+
+func CreateUser(ress http.ResponseWriter, router *http.Request) {
+	ress.Header().Set("Content-Type", "application/json")
 	var user User
 	router.ParseForm()
 
 	_ = json.NewDecoder(router.Body).Decode(&user)
 	user.ID = strconv.Itoa(rand.Intn(10000000))
 	users = append(users, user)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(ress).Encode(user)
 }
 
-// Update users
-func updateUser(w http.ResponseWriter, router *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func UpdateUser(ress http.ResponseWriter, router *http.Request) {
+	ress.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(router)
 	for index, item := range users {
 		if item.ID == params["id"] {
@@ -60,15 +70,15 @@ func updateUser(w http.ResponseWriter, router *http.Request) {
 			_ = json.NewDecoder(router.Body).Decode(&user)
 			user.ID = params["id"]
 			users = append(users, user)
-			json.NewEncoder(w).Encode(user)
+			json.NewEncoder(ress).Encode(user)
 			return
 		}
 	}
 }
 
-// Delete user
-func deleteUser(w http.ResponseWriter, router *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func DeleteUser(ress http.ResponseWriter, router *http.Request) {
+
+	ress.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(router)
 	for index, item := range users {
 		if item.ID == params["id"] {
@@ -76,5 +86,5 @@ func deleteUser(w http.ResponseWriter, router *http.Request) {
 			break
 		}
 	}
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(ress).Encode(users)
 }

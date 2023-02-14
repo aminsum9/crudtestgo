@@ -1,6 +1,8 @@
-package testcrud
+package main
 
 import (
+	"crudtestgo/db"
+
 	"crudtestgo/routers"
 	"log"
 	"net/http"
@@ -9,12 +11,11 @@ import (
 )
 
 func main() {
-	//implementing router
+	db.ConnectDB()
+
 	router := mux.NewRouter()
 
-	//sending router to a different package named "routes"
 	routers.Routes(router)
 
-	//this server runs here
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
