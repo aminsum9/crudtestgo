@@ -112,7 +112,6 @@ func GetUser(ress http.ResponseWriter, router *http.Request) {
 	} else {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, User: responseData, Error: "User tidak ditemukan!"})
 	}
-
 }
 
 func CreateUser(ress http.ResponseWriter, router *http.Request) {
