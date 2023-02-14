@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aminsum9/test-crud/mux"
-	"github.com/aminsum9/test-crud/routes"
+	routers "github.com/aminsum9/test-crud/routers/routers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	router := mux.NewRouter()
 
 	//sending router to a different package named "routes"
-	routes.BasicCrudRoutes(router)
+	routers.BasicCrudRoutes(router)
 
 	//this server runs here
 	log.Fatal(http.ListenAndServe(":8000", router))
