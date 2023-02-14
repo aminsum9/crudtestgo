@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gorilla/mux"
+	// "crudtestgo/controllers"
 )
 
 var Routes = func(router *mux.Router) {

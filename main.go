@@ -1,9 +1,9 @@
 package testcrud
 
 import (
+	"crudtestgo/routers"
 	"log"
 	"net/http"
-	"testcrud/routers"
 
 	"github.com/gorilla/mux"
 )

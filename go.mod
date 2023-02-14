@@ -1,4 +1,4 @@
-module testcrud
+module crudtestgo
 
 go 1.20
 
