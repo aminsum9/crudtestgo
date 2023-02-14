@@ -1,10 +1,10 @@
-package main
+package testcrud
 
 import (
 	"log"
 	"net/http"
 
-	routers "github.com/aminsum9/test-crud/routers/routers"
+	routers "github.com/aminsum9/testcrud/routers/routers"
 	"github.com/gorilla/mux"
 )
 
