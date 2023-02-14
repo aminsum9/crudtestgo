@@ -5,8 +5,10 @@ import (
 )
 
 var Routes = func(router *mux.Router) {
-	// router.HandleFunc("/user/{id}", controllers.getUser).Methods("GET")
-	// router.HandleFunc("/user/create", controllers.createCuser).Methods("POST")
-	// router.HandleFunc("/user/add", controllers.updateUser).Methods("PUT")
-	// router.HandleFunc("/user/delete", controllers.deleteUser).Methods("DELETE")
+
+	router.HandleFunc("/users", controllers.getUser).Methods("GET")
+	router.HandleFunc("/user/{id}", controllers.getUser).Methods("GET")
+	router.HandleFunc("/user/create", controllers.createCuser).Methods("POST")
+	router.HandleFunc("/user/update", controllers.updateUser).Methods("PUT")
+	router.HandleFunc("/user/delete", controllers.deleteUser).Methods("DELETE")
 }
