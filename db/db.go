@@ -7,17 +7,19 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var Database *sql.DB
+
 func ConnectDB() {
-	// Replace the DB_USER and DB_PASSWORD with your database credentials
 	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
 
 	if err != nil {
 		panic(err.Error())
 	}
 
+	Database = db
+
 	defer db.Close()
 
-	// Test the connection
 	err = db.Ping()
 
 	if err != nil {
