@@ -7,16 +7,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var Database *sql.DB
-
-func ConnectDB() {
+func TestDB() {
 	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
 
 	if err != nil {
 		panic(err.Error())
 	}
-
-	Database = db
 
 	defer db.Close()
 
@@ -27,4 +23,14 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Successfully connected to the database!")
+}
+
+func Db() *sql.DB {
+	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return db
 }

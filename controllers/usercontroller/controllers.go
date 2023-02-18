@@ -1,54 +1,35 @@
-package controllers
+package usercontroller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
-	"database/sql"
+	db "crudtestgo/db"
+	"crudtestgo/model/user"
 
 	"github.com/gorilla/mux"
 )
 
-type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-var users []User
-
-func TesConnection(ress http.ResponseWriter, router *http.Request) {
-
-	type Tes struct {
-		Success bool
-	}
-
-	var tes Tes
-
-	tes.Success = true
-
-	json.NewEncoder(ress).Encode(tes)
-}
-
 func GetUsers(ress http.ResponseWriter, router *http.Request) {
 	ress.Header().Set("Content-Type", "application/json")
 
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
+	log.Println(router.Header["Key"], " --------router")
 
-	resultData, err := db.Query("SELECT * FROM users")
+	resultData, err := db.Db().Query("SELECT * FROM users")
 
 	type RessponseData struct {
 		Success bool
-		User    []User
+		User    []*user.User
 		Error   string
 	}
 
-	var result []User
+	var result []*user.User
 
 	if err != nil {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, User: result, Error: err.Error()})
+		return
 	}
 
 	defer resultData.Close()
@@ -58,20 +39,25 @@ func GetUsers(ress http.ResponseWriter, router *http.Request) {
 		var name string
 		var email string
 		var password string
+		var updated_at string
+		var created_at string
 
-		err = resultData.Scan(&id, &name, &email, &password)
+		err = resultData.Scan(&id, &name, &email, &password, &updated_at, &created_at)
 
 		if err != nil {
 			json.NewEncoder(ress).Encode(RessponseData{Success: false, User: result, Error: err.Error()})
+			return
 		}
 
-		result = append(result, User{ID: id, Name: name, Email: email})
+		result = append(result, &user.User{ID: id, Name: name, Email: email, Password: password})
 	}
 
 	if len(result) >= 1 {
 		json.NewEncoder(ress).Encode(RessponseData{Success: true, User: result})
+		return
 	} else {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, User: result})
+		return
 	}
 }
 
@@ -81,18 +67,18 @@ func GetUser(ress http.ResponseWriter, router *http.Request) {
 
 	type RessponseData struct {
 		Success bool
-		User    User
+		User    user.User
 		Error   string
-	}
-
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
-	if err != nil {
-		json.NewEncoder(ress).Encode(RessponseData{Success: true, User: User{}, Error: ""})
 	}
 
 	idUser, err := strconv.Atoi(params["id"])
 
-	resultData, err := db.Query("SELECT * FROM `crud-test`.users WHERE id = ?", idUser)
+	if err != nil {
+		json.NewEncoder(ress).Encode(RessponseData{Success: false, User: user.User{}, Error: "User tidak ditemukan!"})
+		return
+	}
+
+	resultData, err := db.Db().Query("SELECT * FROM `crud-test`.users WHERE id = ?", idUser)
 
 	defer resultData.Close()
 
@@ -105,18 +91,20 @@ func GetUser(ress http.ResponseWriter, router *http.Request) {
 
 	resultData.Scan(&id, &name, &email, &password)
 
-	responseData := User{ID: id, Name: name, Email: email, Password: password}
+	responseData := user.User{ID: id, Name: name, Email: email, Password: password}
 
 	if responseData.ID != 0 {
 		json.NewEncoder(ress).Encode(RessponseData{Success: true, User: responseData, Error: ""})
+		return
 	} else {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, User: responseData, Error: "User tidak ditemukan!"})
+		return
 	}
 }
 
 func CreateUser(ress http.ResponseWriter, router *http.Request) {
 	ress.Header().Set("Content-Type", "application/json")
-	var user User
+	var user user.User
 
 	decoder := json.NewDecoder(router.Body)
 	err := decoder.Decode(&user)
@@ -134,24 +122,20 @@ func CreateUser(ress http.ResponseWriter, router *http.Request) {
 		Message string
 	}
 
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
-
-	if err != nil {
-		json.NewEncoder(ress).Encode(RessponseData{Success: true, Message: err.Error()})
-	}
-
-	_, err = db.Query("INSERT INTO `crud-test`.users VALUES(0,?,?,?)", name, email, password)
+	_, err = db.Db().Query("INSERT INTO `crud-test`.users VALUES(0,?,?,?)", name, email, password)
 
 	if err == nil {
 		json.NewEncoder(ress).Encode(RessponseData{Success: true, Message: "Berhasil menambah user!"})
+		return
 	} else {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, Message: "Gagal menambah user!"})
+		return
 	}
 }
 
 func UpdateUser(ress http.ResponseWriter, router *http.Request) {
 	ress.Header().Set("Content-Type", "application/json")
-	var user User
+	var user user.User
 
 	decoder := json.NewDecoder(router.Body)
 	err := decoder.Decode(&user)
@@ -170,24 +154,20 @@ func UpdateUser(ress http.ResponseWriter, router *http.Request) {
 		Message string
 	}
 
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
-
-	if err != nil {
-		json.NewEncoder(ress).Encode(RessponseData{Success: true, Message: err.Error()})
-	}
-
-	_, err = db.Query("UPDATE `crud-test`.users SET name = ?, email = ?, password = ? WHERE id = ?", name, email, password, idUser)
+	_, err = db.Db().Query("UPDATE `crud-test`.users SET name = ?, email = ?, password = ? WHERE id = ?", name, email, password, idUser)
 
 	if err == nil {
 		json.NewEncoder(ress).Encode(RessponseData{Success: true, Message: "Berhasil update data user!"})
+		return
 	} else {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, Message: "Gagal update data user!"})
+		return
 	}
 }
 
 func DeleteUser(ress http.ResponseWriter, router *http.Request) {
 	ress.Header().Set("Content-Type", "application/json")
-	var user User
+	var user user.User
 
 	decoder := json.NewDecoder(router.Body)
 	err := decoder.Decode(&user)
@@ -203,17 +183,13 @@ func DeleteUser(ress http.ResponseWriter, router *http.Request) {
 		Message string
 	}
 
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/crud-test")
-
-	if err != nil {
-		json.NewEncoder(ress).Encode(RessponseData{Success: true, Message: err.Error()})
-	}
-
-	_, err = db.Query("DELETE FROM `crud-test`.users WHERE id = ?", idUser)
+	_, err = db.Db().Query("DELETE FROM `crud-test`.users WHERE id = ?", idUser)
 
 	if err == nil {
 		json.NewEncoder(ress).Encode(RessponseData{Success: true, Message: "Berhasil delete data user!"})
+		return
 	} else {
 		json.NewEncoder(ress).Encode(RessponseData{Success: false, Message: "Gagal delete data user!"})
+		return
 	}
 }

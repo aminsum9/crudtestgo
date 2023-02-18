@@ -1,8 +1,7 @@
 package main
 
 import (
-	"crudtestgo/db"
-
+	db "crudtestgo/db"
 	"crudtestgo/routers"
 	"log"
 	"net/http"
@@ -11,7 +10,7 @@ import (
 )
 
 func main() {
-	db.ConnectDB()
+	db.Db()
 
 	router := mux.NewRouter()
 
